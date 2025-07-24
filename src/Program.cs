@@ -1,6 +1,10 @@
 using Tau_CoinDesk_Api.Data;
 using Tau_CoinDesk_Api.Services;
+using Tau_CoinDesk_Api.Repositories;
+using Tau_CoinDesk_Api.Middlewares;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,10 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 加入 CoinDeskService
 builder.Services.AddHttpClient<ICoinDeskService, CoinDeskService>();
+builder.Services.AddScoped<IRatesService, RatesService>();
+builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 
-builder.Services.AddControllers();
+// 多語系服務
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+builder.Services.AddControllers()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -20,39 +31,35 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// 語系設定
+var supportedCultures = new[]
+{
+    new CultureInfo("en"),
+    new CultureInfo("zh-TW"),
+};
+
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+});
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/error");
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseDeveloperExceptionPage();
+
+app.UseMiddleware<LoggingMiddleware>();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 //app.UseHttpsRedirection();
 app.MapControllers(); // 啟用 Controller 路由
 app.Run();
-
-/*
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
-*/
