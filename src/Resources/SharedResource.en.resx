@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 英文 資源檔 -->
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- 新增翻譯 Key -->
+  <data name="CurrencyCodeExists" xml:space="preserve">
+    <value>Currency Code Exists</value>
+  </data>
+  <data name="CurrencyNotFound" xml:space="preserve">
+    <value>Currency not found.</value>
+  </data>
+  <data name="USD" xml:space="preserve">
+    <value>US Dollar</value>
+  </data>
+  <data name="GBP" xml:space="preserve">
+    <value>British Pound</value>
+  </data>
+  <data name="EUR" xml:space="preserve">
+    <value>Euro</value>
+  </data>
+  <data name="CHF" xml:space="preserve">
+    <value>Swiss Franc</value>
+  </data>
+  <data name="CAD" xml:space="preserve">
+    <value>Canadian Dollar</value>
+  </data>
+  <data name="BRL" xml:space="preserve">
+    <value>Brazilian Real</value>
+  </data>
+  <data name="TWD" xml:space="preserve">
+    <value>New Taiwan Dollar</value>
+  </data>
+  <data name="CNY" xml:space="preserve">
+    <value>Chinese Yuan</value>
+  </data>
+  <data name="HKD" xml:space="preserve">
+    <value>Hong Kong Dollar</value>
+  </data>
+  <data name="JPY" xml:space="preserve">
+    <value>Japanese Yen</value>
+  </data>
+  <data name="KRW" xml:space="preserve">
+    <value>Korean Won</value>
+  </data>
+  <data name="SGD" xml:space="preserve">
+    <value>Singapore Dollar</value>
+  </data>
+  <data name="THB" xml:space="preserve">
+    <value>Thai Baht</value>
+  </data>
+  <data name="PHP" xml:space="preserve">
+    <value>Philippine Peso</value>
+  </data>
+  <data name="VND" xml:space="preserve">
+    <value>Vietnamese Dong</value>
+  </data>
+  <data name="MYR" xml:space="preserve">
+    <value>Malaysian Ringgit</value>
+  </data>
+  <data name="INR" xml:space="preserve">
+    <value>Indian Rupee</value>
+  </data>
+  <data name="AUD" xml:space="preserve">
+    <value>Australian Dollar</value>
+  </data>
+  <data name="NZD" xml:space="preserve">
+    <value>New Zealand dollar</value>
+  </data>
+  <data name="RUB" xml:space="preserve">
+    <value>Russian Ruble</value>
+  </data>
+</root>
