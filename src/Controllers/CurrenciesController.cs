@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Tau_CoinDesk_Api.Data;
 using Tau_CoinDesk_Api.Models;
+using Tau_CoinDesk_Api.Services;
 
 namespace Tau_CoinDesk_Api.Controllers
 {
@@ -9,44 +8,38 @@ namespace Tau_CoinDesk_Api.Controllers
     [Route("api/[controller]")]
     public class CurrenciesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICurrencyService _service;
 
-        public CurrenciesController(AppDbContext context)
+        public CurrenciesController(ICurrencyService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Currency>>> GetCurrencies()
+        public async Task<IActionResult> GetCurrencies()
         {
-            return await _context.Currencies.OrderBy(c => c.Code).ToListAsync();
+            var result = await _service.GetCurrenciesAsync();
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Currency>> PostCurrency(Currency currency)
+        public async Task<IActionResult> PostCurrency(Currency currency)
         {
-            _context.Currencies.Add(currency);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetCurrencies), new { id = currency.Id }, currency);
+            var created = await _service.CreateCurrencyAsync(currency);
+            return CreatedAtAction(nameof(GetCurrencies), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCurrency(int id, Currency currency)
+        public async Task<IActionResult> UpdateCurrency(Guid id, Currency currency)
         {
-            if (id != currency.Id) return BadRequest();
-            _context.Entry(currency).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            await _service.UpdateCurrencyAsync(id, currency);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCurrency(int id)
+        public async Task<IActionResult> DeleteCurrency(Guid id)
         {
-            var currency = await _context.Currencies.FindAsync(id);
-            if (currency == null) return NotFound();
-
-            _context.Currencies.Remove(currency);
-            await _context.SaveChangesAsync();
+            await _service.DeleteCurrencyAsync(id);
             return NoContent();
         }
     }
