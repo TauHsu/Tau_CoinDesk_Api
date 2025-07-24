@@ -5,68 +5,50 @@ using Tau_CoinDesk_Api.Models;
 using Tau_CoinDesk_Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Moq;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Tau_CoinDesk_Api.Tests
 {
     public class RatesControllerTests
     {
-        private readonly AppDbContext _context;
-
-        public RatesControllerTests()
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: "RatesTestDb") // 使用記憶體資料庫
-                .Options;
-
-            _context = new AppDbContext(options);
-
-            // 確保資料只加一次
-            if (!_context.Currencies.Any())
-            {
-                _context.Currencies.AddRange(
-                    new Currency { Code = "USD", ChineseName = "美元" },
-                    new Currency { Code = "GBP", ChineseName = "英鎊" }
-                );
-                _context.SaveChanges();
-            }
-        }
-
         [Fact]
         public async Task ReturnsRatesWithChineseNames()
         {
-            var mockService = new Mock<ICoinDeskService>();
-            var mockJson = JsonDocument.Parse(@"{
-                ""time"": { ""updatedISO"": ""2022-08-03T20:25:00+00:00"" },
-                ""bpi"": {
-                    ""USD"": { ""rate"": ""23,342.0112"" },
-                    ""GBP"": { ""rate"": ""19,504.3978"" }
+            // 模擬 RatesService
+            var mockRatesService = new Mock<IRatesService>();
+
+            var mockResult = new RatesResponseDto
+            {
+                UpdatedTime = "2022/08/04 04:25:00",
+                Rates = new List<RateItemDto>
+                {
+                    new RateItemDto { Code = "USD", Name = "美元", Rate = "23,342.0112" },
+                    new RateItemDto { Code = "GBP", Name = "英鎊", Rate = "19,504.3978" }
                 }
-            }");
-            mockService.Setup(s => s.GetRatesAsync()).ReturnsAsync(mockJson);
+            };
 
-            var controller = new RatesController(mockService.Object, _context);
+            mockRatesService
+                .Setup(s => s.GetRatesAsync())
+                .ReturnsAsync(mockResult);
 
-            var result = await controller.GetRates();
-            var ok = Assert.IsType<OkObjectResult>(result);
+            var controller = new RatesController(mockRatesService.Object);
 
-            var json = JsonSerializer.Serialize(ok.Value);
-            using var doc = JsonDocument.Parse(json);
+            var actionResult = await controller.GetRates();
 
-            // 檢查時間格式
-            string updatedTime = doc.RootElement.GetProperty("updatedTime").GetString();
-            Assert.Equal("2022/08/04 04:25:00", updatedTime);
+            var okResult = Assert.IsType<OkObjectResult>(actionResult);
 
-            // 直接取出 rates 陣列
-            var rates = doc.RootElement.GetProperty("rates").EnumerateArray().ToList();
-            Assert.Equal(2, rates.Count);
+            var returnValue = Assert.IsType<RatesResponseDto>(okResult.Value);
 
-            // 驗證是否有包含 美元 和 英鎊
-            Assert.Contains(rates, r => r.GetProperty("code").GetString() == "USD" &&
-                                        r.GetProperty("chineseName").GetString() == "美元");
-            Assert.Contains(rates, r => r.GetProperty("code").GetString() == "GBP" &&
-                                        r.GetProperty("chineseName").GetString() == "英鎊");
+            Assert.Equal("2022/08/04 04:25:00", returnValue.UpdatedTime);
+            Assert.Equal(2, returnValue.Rates.Count);
+
+            Assert.Contains(returnValue.Rates, r => r.Code == "USD" && r.Name == "美元");
+            Assert.Contains(returnValue.Rates, r => r.Code == "GBP" && r.Name == "英鎊");
+
         }
     }
 }
