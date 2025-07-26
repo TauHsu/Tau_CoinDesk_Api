@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Localization;
-//using System.Text.Json;
-//using Tau_CoinDesk_Api.Models;
-//using Tau_CoinDesk_Api.Services;
-using Tau_CoinDesk_Api.Repositories;
+using Tau_CoinDesk_Api.Models.Dto;
+using Tau_CoinDesk_Api.Interfaces.Repositories;
+using Tau_CoinDesk_Api.Interfaces.Services;
+using Tau_CoinDesk_Api.Interfaces.Security;
+using Tau_CoinDesk_Api.Exceptions;
+using System.Text.Json;
 
 namespace Tau_CoinDesk_Api.Services
 {
@@ -10,15 +12,24 @@ namespace Tau_CoinDesk_Api.Services
     {
         private readonly ICoinDeskService _coinDeskService;
         private readonly ICurrencyRepository _currencyRepo;
+        private readonly IRsaCertificateStrategy _rsa;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly JsonSerializerOptions _jsonOptions;
 
         public RatesService(ICoinDeskService coinDeskService,
                             ICurrencyRepository currencyRepo,
+                            IRsaCertificateStrategy rsa,
                             IStringLocalizer<SharedResource> localizer)
         {
             _coinDeskService = coinDeskService;
             _currencyRepo = currencyRepo;
+            _rsa = rsa;
             _localizer = localizer;
+            _jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false
+            };
         }
 
         public async Task<RatesResponseDto> GetRatesAsync()
@@ -44,12 +55,6 @@ namespace Tau_CoinDesk_Api.Services
                     var rate = currency.Value.GetProperty("rate").GetString();
                     var localizedName = _localizer[code];
 
-                    /*
-                    // 找中文名稱，沒有就給空字串
-                    var chineseName = currencies
-                        .FirstOrDefault(c => c.Code.Equals(code, StringComparison.OrdinalIgnoreCase))
-                        ?.ChineseName ?? "";
-                    */
                     return new RateItemDto
                     {
                         Code = code,
@@ -63,6 +68,31 @@ namespace Tau_CoinDesk_Api.Services
                 UpdatedTime = updateTime,
                 Rates = rates
             };
+        }
+
+        public async Task<RatesSignedResponseDto> GetSignedRatesAsync()
+        {
+            var result = await GetRatesAsync();
+            var jsonString = JsonSerializer.Serialize(result);
+            var signature = _rsa.SignData(jsonString);
+
+            return new RatesSignedResponseDto
+            {
+                Data = result,
+                Signature = signature
+            };
+        }
+        
+        public bool VerifyRates(RatesResponseDto Data, string Signature)
+        {
+            var jsonString = JsonSerializer.Serialize(Data);
+            var isValid = _rsa.VerifyData(jsonString, Signature);
+            if (!isValid)
+            {
+                throw new AppException(400, _localizer["VerifyFail"]);
+            }
+
+            return isValid;
         }
     }
 }
