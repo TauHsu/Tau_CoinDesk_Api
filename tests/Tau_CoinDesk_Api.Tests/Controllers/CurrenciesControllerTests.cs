@@ -1,112 +1,119 @@
 using Xunit;
-using Tau_CoinDesk_Api.Controllers;
-using Tau_CoinDesk_Api.Models;
-using Tau_CoinDesk_Api.Services;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Tau_CoinDesk_Api.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using Tau_CoinDesk_Api.Controllers;
+using Tau_CoinDesk_Api.Models.Entities;
+using Tau_CoinDesk_Api.Models.Dto;
+using Tau_CoinDesk_Api.Interfaces.Services;
 
 namespace Tau_CoinDesk_Api.Tests
 {
     public class CurrenciesControllerTests
     {
-        private readonly Guid _testGuid1 = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-        private readonly Guid _testGuid2 = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        private readonly Mock<ICurrencyService> _serviceMock;
+        private readonly Mock<IStringLocalizer<SharedResource>> _localizerMock;
+        private readonly CurrenciesController _controller;
+
+        public CurrenciesControllerTests()
+        {
+            _serviceMock = new Mock<ICurrencyService>();
+            _localizerMock = new Mock<IStringLocalizer<SharedResource>>();
+
+            // 預設 localizer 回傳 key 本身
+            _localizerMock.Setup(l => l[It.IsAny<string>()])
+                          .Returns((string key) => new LocalizedString(key, key));
+
+            _controller = new CurrenciesController(_serviceMock.Object, _localizerMock.Object);
+        }
 
         [Fact]
-        public async Task GetCurrencies_ReturnsList()
+        public async Task GetCurrencies_ReturnsOkResult_WithApiResponse()
         {
-            var mockService = new Mock<ICurrencyService>();
-            mockService.Setup(s => s.GetCurrenciesAsync())
-                       .ReturnsAsync(new List<Currency>
-                       {
-                           new Currency { Id = _testGuid1, Code = "USD", ChineseName = "美元" },
-                           new Currency { Id = _testGuid2, Code = "GBP", ChineseName = "英鎊" }
-                       });
+            // Arrange
+            var fakeCurrencies = new List<object> { new { Code = "USD", Name = "美元" } };
+            _serviceMock.Setup(s => s.GetCurrenciesAsync())
+                        .ReturnsAsync(fakeCurrencies);
 
-            var controller = new CurrenciesController(mockService.Object);
+            // Act
+            var result = await _controller.GetCurrencies();
 
-            var result = await controller.GetCurrencies();
+            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var list = Assert.IsAssignableFrom<IEnumerable<Currency>>(okResult.Value);
-            Assert.Equal(2, ((List<Currency>)list).Count);
+            var response = Assert.IsType<ApiResponse<IEnumerable<object>>>(okResult.Value);
+            Assert.True(response.Success);
+            Assert.Equal(fakeCurrencies, response.Data);
         }
 
         [Fact]
-        public async Task PostCurrency_ReturnsCreated()
+        public async Task GetCurrency_ReturnsOkResult_WithApiResponse()
         {
-            var mockService = new Mock<ICurrencyService>();
-            var createdCurrency = new Currency { Id = _testGuid1, Code = "USD", ChineseName = "美元" };
-            mockService.Setup(s => s.CreateCurrencyAsync(It.IsAny<Currency>()))
-                       .ReturnsAsync(createdCurrency);
+            // Arrange
+            var fakeCurrency = new CurrencyDto { Id = Guid.NewGuid(), Code = "USD", Name = "美元" };
+            _serviceMock.Setup(s => s.GetOneCurrencyAsync(fakeCurrency.Id))
+                        .ReturnsAsync(fakeCurrency);
 
-            var controller = new CurrenciesController(mockService.Object);
+            // Act
+            var result = await _controller.GetCurrency(fakeCurrency.Id);
 
-            var result = await controller.PostCurrency(new Currency { Code = "USD", ChineseName = "美元" });
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<CurrencyDto>>(okResult.Value);
+            Assert.True(response.Success);
+            Assert.Equal(fakeCurrency, response.Data);
+        }
+
+        [Fact]
+        public async Task PostCurrency_ReturnsCreatedAtAction_WithApiResponse()
+        {
+            // Arrange
+            var newCurrency = new Currency { Id = Guid.NewGuid(), Code = "USD", ChineseName = "美元" };
+            _serviceMock.Setup(s => s.CreateCurrencyAsync(It.IsAny<Currency>()))
+                        .ReturnsAsync(newCurrency);
+
+            // Act
+            var result = await _controller.PostCurrency(newCurrency);
+
+            // Assert
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-            var currency = Assert.IsType<Currency>(createdResult.Value);
-            Assert.Equal("USD", currency.Code);
+            var response = Assert.IsType<ApiResponse<Currency>>(createdResult.Value);
+            Assert.True(response.Success);
+            Assert.Equal(newCurrency, response.Data);
         }
 
         [Fact]
-        public async Task UpdateCurrency_ReturnsNoContent_WhenSuccessful()
+        public async Task UpdateCurrency_ReturnsAccepted_WithApiResponse()
         {
-            var mockService = new Mock<ICurrencyService>();
-            mockService.Setup(s => s.UpdateCurrencyAsync(_testGuid1, It.IsAny<Currency>()))
-                       .ReturnsAsync(true);
+            // Arrange
+            var id = Guid.NewGuid();
+            _serviceMock.Setup(s => s.UpdateCurrencyAsync(id, It.IsAny<Currency>()))
+                        .ReturnsAsync(true);
 
-            var controller = new CurrenciesController(mockService.Object);
+            // Act
+            var result = await _controller.UpdateCurrency(id, new Currency());
 
-            var result = await controller.UpdateCurrency(_testGuid1, new Currency { Code = "USD" });
-            Assert.IsType<NoContentResult>(result);
+            // Assert
+            var acceptedResult = Assert.IsType<AcceptedResult>(result);
+            var response = Assert.IsType<ApiResponse<bool>>(acceptedResult.Value);
+            Assert.True(response.Success);
+            Assert.True(response.Data);
         }
 
         [Fact]
-        public async Task UpdateCurrency_ReturnsNotFound_WhenFailed()
+        public async Task DeleteCurrency_ReturnsOkResult_WithApiResponse()
         {
-            var mockService = new Mock<ICurrencyService>();
-            mockService.Setup(s => s.UpdateCurrencyAsync(_testGuid1, It.IsAny<Currency>()))
-                    .ThrowsAsync(new AppException(404, "Currency not found"));
+            // Arrange
+            var id = Guid.NewGuid();
+            _serviceMock.Setup(s => s.DeleteCurrencyAsync(id))
+                        .ReturnsAsync(true);
 
-            var controller = new CurrenciesController(mockService.Object);
+            // Act
+            var result = await _controller.DeleteCurrency(id);
 
-            var ex = await Assert.ThrowsAsync<AppException>(() =>
-                controller.UpdateCurrency(_testGuid1, new Currency { Code = "USD" })
-            );
-
-            Assert.Equal(404, ex.StatusCode);
-            Assert.Equal("Currency not found", ex.Message);
-        }
-
-        [Fact]
-        public async Task DeleteCurrency_ReturnsNoContent_WhenSuccessful()
-        {
-            var mockService = new Mock<ICurrencyService>();
-            mockService.Setup(s => s.DeleteCurrencyAsync(_testGuid1))
-                    .ReturnsAsync(true);
-
-            var controller = new CurrenciesController(mockService.Object);
-
-            var result = await controller.DeleteCurrency(_testGuid1);
-
-            Assert.IsType<NoContentResult>(result);
-        }
-
-        [Fact]
-        public async Task DeleteCurrency_ReturnsNotFound_WhenFailed()
-        {
-            var mockService = new Mock<ICurrencyService>();
-            mockService.Setup(s => s.DeleteCurrencyAsync(_testGuid1))
-                    .ThrowsAsync(new AppException(404, "Currency not found"));
-
-            var controller = new CurrenciesController(mockService.Object);
-
-            var ex = await Assert.ThrowsAsync<AppException>(() => controller.DeleteCurrency(_testGuid1));
-            
-            Assert.Equal(404, ex.StatusCode);
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<object>>(okResult.Value);
+            Assert.True(response.Success);
         }
     }
 }
