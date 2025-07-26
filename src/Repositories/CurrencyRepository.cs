@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Tau_CoinDesk_Api.Data;
-using Tau_CoinDesk_Api.Models;
+using Tau_CoinDesk_Api.Models.Entities;
+using Tau_CoinDesk_Api.Interfaces.Repositories;
 
 namespace Tau_CoinDesk_Api.Repositories
 {

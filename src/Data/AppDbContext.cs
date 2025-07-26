@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Tau_CoinDesk_Api.Models;
+using Tau_CoinDesk_Api.Models.Entities;
 
 namespace Tau_CoinDesk_Api.Data
 {
