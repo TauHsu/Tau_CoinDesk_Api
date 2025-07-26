@@ -15,12 +15,31 @@
   </resheader>
 
   <!-- 新增翻譯 Key -->
+  <data name="GetSuccess" xml:space="preserve">
+    <value>Got successfully</value>
+  </data>
+  <data name="CreateSuccess" xml:space="preserve">
+    <value>Created successfully</value>
+  </data>
+  <data name="UpdateSuccess" xml:space="preserve">
+    <value>Updated successfully</value>
+  </data>
+  <data name="DeleteSuccess" xml:space="preserve">
+    <value>Deleted successfully</value>
+  </data>
+  <data name="VerifySuccess" xml:space="preserve">
+    <value>Verified successfully</value>
+  </data>
   <data name="CurrencyCodeExists" xml:space="preserve">
     <value>Currency Code Exists</value>
   </data>
   <data name="CurrencyNotFound" xml:space="preserve">
-    <value>Currency not found.</value>
+    <value>Currency not found</value>
   </data>
+  <data name="VerifyFail" xml:space="preserve">
+    <value>Verify Failed</value>
+  </data>
+  
   <data name="USD" xml:space="preserve">
     <value>US Dollar</value>
   </data>
