@@ -1,4 +1,4 @@
-namespace Tau_CoinDesk_Api.Models
+namespace Tau_CoinDesk_Api.Models.Entities
 {
     public class Currency
     {
