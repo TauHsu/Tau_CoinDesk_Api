@@ -1,7 +1,7 @@
 using System.Text.Json;
-using System.Threading.Tasks;
+//using System.Threading.Tasks;
 
-namespace Tau_CoinDesk_Api.Services
+namespace Tau_CoinDesk_Api.Interfaces.Services
 {
     public interface ICoinDeskService
     {

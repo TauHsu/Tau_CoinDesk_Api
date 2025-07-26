@@ -1,6 +1,6 @@
-using Tau_CoinDesk_Api.Models;
+using Tau_CoinDesk_Api.Models.Entities;
 
-namespace Tau_CoinDesk_Api.Repositories
+namespace Tau_CoinDesk_Api.Interfaces.Repositories
 {
     public interface ICurrencyRepository
     {
