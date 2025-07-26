@@ -1,54 +1,93 @@
 using Xunit;
-using Tau_CoinDesk_Api.Controllers;
-using Tau_CoinDesk_Api.Data;
-using Tau_CoinDesk_Api.Models;
-using Tau_CoinDesk_Api.Services;
-using Microsoft.EntityFrameworkCore;
+using Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using Moq;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+using Tau_CoinDesk_Api.Controllers;
+using Tau_CoinDesk_Api.Models.Entities;
+using Tau_CoinDesk_Api.Models.Dto;
+using Tau_CoinDesk_Api.Interfaces.Services;
 
 namespace Tau_CoinDesk_Api.Tests
 {
     public class RatesControllerTests
     {
-        [Fact]
-        public async Task ReturnsRatesWithChineseNames()
-        {
-            // 模擬 RatesService
-            var mockRatesService = new Mock<IRatesService>();
+        private readonly Mock<IRatesService> _ratesServiceMock;
+        private readonly Mock<IStringLocalizer<SharedResource>> _localizerMock;
+        private readonly RatesController _controller;
 
-            var mockResult = new RatesResponseDto
+        public RatesControllerTests()
+        {
+            _ratesServiceMock = new Mock<IRatesService>();
+            _localizerMock = new Mock<IStringLocalizer<SharedResource>>();
+
+            // 預設 Localizer 回傳 "Success"
+            _localizerMock
+                .Setup(l => l["GetSuccess"])
+                .Returns(new LocalizedString("GetSuccess", "Success"));
+            _localizerMock
+                .Setup(l => l["VerifySuccess"])
+                .Returns(new LocalizedString("VerifySuccess", "Verified"));
+
+            _controller = new RatesController(_ratesServiceMock.Object, _localizerMock.Object);
+        }
+
+        [Fact]
+        public async Task GetRates_ReturnsOk_WithApiResponse()
+        {
+            // Arrange
+            var fakeResult = new RatesResponseDto(); // 可以依需求初始化
+            _ratesServiceMock.Setup(s => s.GetRatesAsync()).ReturnsAsync(fakeResult);
+
+            // Act
+            var result = await _controller.GetRates();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<RatesResponseDto>>(okResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal(fakeResult, apiResponse.Data);
+        }
+
+        [Fact]
+        public async Task GetSignedRates_ReturnsOk_WithApiResponse()
+        {
+            // Arrange
+            var fakeResult = new RatesSignedResponseDto(); // 可初始化
+            _ratesServiceMock.Setup(s => s.GetSignedRatesAsync()).ReturnsAsync(fakeResult);
+
+            // Act
+            var result = await _controller.GetSignedRates();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<RatesSignedResponseDto>>(okResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.Equal(fakeResult, apiResponse.Data);
+        }
+
+        [Fact]
+        public void VerifyRates_ReturnsOk_WithApiResponse()
+        {
+            // Arrange
+            var fakeRates = new RatesResponseDto
             {
-                UpdatedTime = "2022/08/04 04:25:00",
+                UpdatedTime = "2025/07/26 12:00:00",
                 Rates = new List<RateItemDto>
                 {
-                    new RateItemDto { Code = "USD", Name = "美元", Rate = "23,342.0112" },
-                    new RateItemDto { Code = "GBP", Name = "英鎊", Rate = "19,504.3978" }
+                    new RateItemDto { Code = "USD", Name = "US Dollar", Rate = "23,342.0112" }
                 }
             };
+            var request = new VerifyRatesRequestDto { Data = fakeRates, Signature = "sig" };
+            _ratesServiceMock.Setup(s => s.VerifyRates(fakeRates, "sig")).Returns(true);
 
-            mockRatesService
-                .Setup(s => s.GetRatesAsync())
-                .ReturnsAsync(mockResult);
+            // Act
+            var result = _controller.VerifyRates(request);
 
-            var controller = new RatesController(mockRatesService.Object);
-
-            var actionResult = await controller.GetRates();
-
-            var okResult = Assert.IsType<OkObjectResult>(actionResult);
-
-            var returnValue = Assert.IsType<RatesResponseDto>(okResult.Value);
-
-            Assert.Equal("2022/08/04 04:25:00", returnValue.UpdatedTime);
-            Assert.Equal(2, returnValue.Rates.Count);
-
-            Assert.Contains(returnValue.Rates, r => r.Code == "USD" && r.Name == "美元");
-            Assert.Contains(returnValue.Rates, r => r.Code == "GBP" && r.Name == "英鎊");
-
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<object>>(okResult.Value);
+            Assert.True(apiResponse.Success);
+            Assert.True((bool)apiResponse.Data!);
         }
     }
 }
