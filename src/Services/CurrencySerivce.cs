@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Localization;
-using Tau_CoinDesk_Api.Models;
-using Tau_CoinDesk_Api.Repositories;
-//using Tau_CoinDesk_Api.Controllers;
+using Tau_CoinDesk_Api.Models.Entities;
+using Tau_CoinDesk_Api.Models.Dto;
+using Tau_CoinDesk_Api.Interfaces.Repositories;
+using Tau_CoinDesk_Api.Interfaces.Services;
 using Tau_CoinDesk_Api.Exceptions;
 
 namespace Tau_CoinDesk_Api.Services
@@ -33,9 +34,30 @@ namespace Tau_CoinDesk_Api.Services
             return await _currencyRepo.GetByIdAsync(id);
         }
 
+        public async Task<IEnumerable<Currency>> GetAllRawAsync()
+        {
+            return await _currencyRepo.GetAllAsync();
+        }
+
         public async Task<Currency?> GetByCodeAsync(string code)
         {
             return await _currencyRepo.GetByCodeAsync(code);
+        }
+
+        public async Task<CurrencyDto> GetOneCurrencyAsync(Guid id)
+        {
+            var currency = await _currencyRepo.GetByIdAsync(id);
+            if (currency == null)
+            {
+                throw new AppException(404, _localizer["CurrencyNotFound"]);
+            }
+
+            return new CurrencyDto
+            {
+                Id = currency.Id,
+                Code = currency.Code,
+                Name = _localizer[$"{currency.Code}"]
+            };
         }
 
         public async Task<Currency> CreateCurrencyAsync(Currency currency)
@@ -54,10 +76,13 @@ namespace Tau_CoinDesk_Api.Services
         public async Task<bool> UpdateCurrencyAsync(Guid id, Currency currency)
         {
             var existCurrency = await _currencyRepo.GetByIdAsync(id);
-            Console.WriteLine(existCurrency);
             if (existCurrency == null)
             {
                 throw new AppException(404, _localizer["CurrencyNotFound"]);
+            }
+            if (currency.Code == existCurrency.Code)
+            {
+                throw new AppException(400, _localizer["CurrencyCodeExists"]);
             }
 
             existCurrency.Code = currency.Code;
