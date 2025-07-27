@@ -1,6 +1,18 @@
 version: "3.9"
 
 services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql1
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Coindesk123"
+    ports:
+      - "1433:1433"
+    networks:
+      - coindesk-network
+
   api:
     build: .
     container_name: coindesk-api
@@ -14,9 +26,12 @@ services:
       - AES__IV=${AES_IV}
       - RSA__PrivateKeyPath=${RSA_PRIVATE_KEY_PATH}
       - RSA__PublicKeyPath=${RSA_PUBLIC_KEY_PATH}
+    depends_on:
+      - db
     networks:
       - coindesk-network
 
 networks:
   coindesk-network:
-    external: true
+    name: coindesk-network
+    driver: bridge
