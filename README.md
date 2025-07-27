@@ -137,9 +137,6 @@ cp .env.example .env
 ```bash
 docker-compose up -d
 ```
-此指令會啟動：
-- db：SQL Server (帳號：sa / 密碼：Coindesk123)
-- api：ASP.NET Core 8.0 API (http://localhost:8080
 ###### 步驟 2. 初始化資料庫 (EF Core Migration)
 ```bash
 dotnet ef database update --project src/Tau_CoinDesk_Api.csproj
