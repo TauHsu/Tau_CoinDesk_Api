@@ -18,7 +18,7 @@
 - .NET 8.0 SDK (開發與執行 API)
 - Docker & Docker Compose (用來啟動 SQL Server 與 API 容器)
 - Dbeaver (選用，用於檢視資料庫內容)
-本專案使用 Docker 部署的 SQL Server 2022 (非 LocalDB)，因此可跨 Windows / Mac / Linux 環境運行。
+>本專案使用 Docker 部署的 SQL Server 2022 (非 LocalDB)，因此可跨 Windows / Mac / Linux 環境運行。
 
 ---
 
