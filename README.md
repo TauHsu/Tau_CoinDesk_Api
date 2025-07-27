@@ -117,7 +117,7 @@ Tau_CoinDesk_Api (ASP .NET Core 8.0)/
 以下將會引導你如何安裝此專案到你的電腦上。
 #### 下載專案
 ```bash
-git clone https://github.com/your-username/Tau_CoinDesk_Api.git
+git clone https://github.com/TauHsu/Tau_CoinDesk_Api.git
 ```
 #### 移動到專案內
 ```bash
