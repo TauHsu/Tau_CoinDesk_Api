@@ -143,11 +143,11 @@ docker-compose up -d
 ###### 步驟 2. 初始化資料庫 (EF Core Migration)
 新增 Migration：
 ```bash
-docker exec -it coindesk-api dotnet ef database update
+dotnet ef migrations add InitialCreate --project src/Tau_CoinDesk_Api.csproj
 ```
 執行 Migration：
 ```bash
-dotnet ef database update --project src/Tau_CoinDesk_Api.csproj
+docker exec -it coindesk-api dotnet ef database update
 ```
 
 ###### 步驟 3. 測試 API
@@ -166,8 +166,11 @@ docker-compose up -d db
 DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
 ```
 #### 在本地端執行 Migration：
-新增、執行 Migration(同上述 Docker 提到之方法)
-
+新增 Migration(同上述 Docker 提到之方法)
+執行 Migration：
+```bash
+docker exec -it coindesk-api dotnet ef database update
+```
 #### 啟動 API（本地端）：
 ```bash
 dotnet run --project src/Tau_CoinDesk_Api.csproj
