@@ -156,7 +156,7 @@ dotnet ef database update --project src/Tau_CoinDesk_Api.csproj
 docker-compose up -d db
 ```
 ##### 步驟 2. 編輯 appsettings.json，將機密資料填入：
-(正式環境時，不會給予。)
+>(正式環境時，不會給予。)
 ```bash
 DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
 "AES": {
