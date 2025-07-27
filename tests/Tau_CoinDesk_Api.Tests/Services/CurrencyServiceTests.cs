@@ -1,5 +1,6 @@
 using Xunit;
 using Moq;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Tau_CoinDesk_Api.Models.Entities;
 using Tau_CoinDesk_Api.Services;
@@ -164,15 +165,38 @@ namespace Tau_CoinDesk_Api.Tests.Services
         }
 
         [Fact]
-        public async Task UpdateCurrencyAsync_ShouldThrow_WhenCodeSameAsExisting()
+        public async Task UpdateCurrencyAsync_ShouldThrow400_WhenDataNotChanged()
         {
-            var id = Guid.NewGuid();
-            var existCurrency = new Currency { Id = id, Code = "USD", ChineseName = "美元" };
-            var newCurrency = new Currency { Code = "USD", ChineseName = "美元更新" };
+            var existCurrency = new Currency { Id = Guid.NewGuid(), Code = "USD", ChineseName = "美元" };
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(existCurrency);
 
-            _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(existCurrency);
+            var newCurrency = new Currency { Code = "USD", ChineseName = "美元" };
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.UpdateCurrencyAsync(id, newCurrency));
+
+            var ex = await Assert.ThrowsAsync<AppException>(() =>
+                _service.UpdateCurrencyAsync(existCurrency.Id, newCurrency)
+            );
+            Assert.Equal(400, ex.StatusCode);
+            Assert.Equal("CurrencyDataNotChange", ex.Message);
+        }
+
+        [Fact]
+        public async Task UpdateCurrencyAsync_ShouldThrow400_WhenUniqueConstraintViolation()
+        {
+            var existing = new Currency { Id = Guid.NewGuid(), Code = "USD", ChineseName = "美元" };
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(existing);
+
+            _repoMock.Setup(r => r.UpdateAsync(It.IsAny<Currency>()))
+                .ThrowsAsync(new DbUpdateException("UNIQUE constraint failed", new Exception("UNIQUE constraint failed")));
+
+            var input = new Currency { Code = "EUR", ChineseName = "歐元" };
+
+            var ex = await Assert.ThrowsAsync<AppException>(() =>
+                _service.UpdateCurrencyAsync(existing.Id, input)
+            );
+
             Assert.Equal(400, ex.StatusCode);
             Assert.Equal("CurrencyCodeExists", ex.Message);
         }

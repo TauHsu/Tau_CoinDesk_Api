@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Tau_CoinDesk_Api.Models.Entities;
 using Tau_CoinDesk_Api.Models.Dto;
@@ -80,16 +81,28 @@ namespace Tau_CoinDesk_Api.Services
             {
                 throw new AppException(404, _localizer["CurrencyNotFound"]);
             }
-            if (currency.Code == existCurrency.Code)
+            if (currency.Code == existCurrency.Code && currency.ChineseName == existCurrency.ChineseName)
             {
-                throw new AppException(400, _localizer["CurrencyCodeExists"]);
+                throw new AppException(400, _localizer["CurrencyDataNotChange"]);
             }
 
             existCurrency.Code = currency.Code;
             existCurrency.ChineseName = currency.ChineseName;
-            
-            await _currencyRepo.UpdateAsync(existCurrency);
-            return true;
+
+            try
+            {
+                await _currencyRepo.UpdateAsync(existCurrency);
+                return true;
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException?.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    throw new AppException(400, _localizer["CurrencyCodeExists"]);
+                }
+
+                throw;
+            }
         }
 
         public async Task<bool> DeleteCurrencyAsync(Guid id)
