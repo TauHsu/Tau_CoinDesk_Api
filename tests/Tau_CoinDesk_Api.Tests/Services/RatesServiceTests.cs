@@ -119,12 +119,11 @@ namespace Tau_CoinDesk_Api.Tests.Services
             // Arrange
             var rates = new RatesResponseDto { UpdatedTime = "2025/07/26", Rates = new List<RateItemDto>() };
             _rsaMock.Setup(r => r.VerifyData(It.IsAny<string>(), "sig")).Returns(false);
-            _localizerMock.Setup(l => l["VerifyFail"]).Returns(new LocalizedString("VerifyFail", "驗證失敗"));
 
             // Act & Assert
             var ex = Assert.Throws<AppException>(() => _service.VerifyRates(rates, "sig"));
             Assert.Equal(400, ex.StatusCode);
-            Assert.Equal("驗證失敗", ex.Message);
+            Assert.Equal("VerifyFail", ex.Message);
         }
     }
 }

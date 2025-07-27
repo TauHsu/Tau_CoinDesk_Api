@@ -98,7 +98,7 @@ namespace Tau_CoinDesk_Api.Tests.Services
 
             Assert.Equal(id, result.Id);
             Assert.Equal("USD", result.Code);
-            Assert.Equal("USD", result.Name); // 因為 localizer 回傳 key 本身
+            Assert.Equal("USD", result.Name);
         }
 
         [Fact]

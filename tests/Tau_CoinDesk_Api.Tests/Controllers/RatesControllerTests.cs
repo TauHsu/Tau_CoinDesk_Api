@@ -35,7 +35,7 @@ namespace Tau_CoinDesk_Api.Tests
         public async Task GetRates_ReturnsOk_WithApiResponse()
         {
             // Arrange
-            var fakeResult = new RatesResponseDto(); // 可以依需求初始化
+            var fakeResult = new RatesResponseDto();
             _ratesServiceMock.Setup(s => s.GetRatesAsync()).ReturnsAsync(fakeResult);
 
             // Act

@@ -1,12 +1,12 @@
 using Xunit;
 using Moq;
-using System;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 using Tau_CoinDesk_Api.Models.Entities;
 using Tau_CoinDesk_Api.Models.Dto;
 using Tau_CoinDesk_Api.Services;
 using Tau_CoinDesk_Api.Interfaces.Services;
 using Tau_CoinDesk_Api.Interfaces.Encryption;
+using Tau_CoinDesk_Api.Exceptions;
 
 namespace Tau_CoinDesk_Api.Tests
 {
@@ -15,30 +15,36 @@ namespace Tau_CoinDesk_Api.Tests
         private readonly Mock<ICurrencyService> _currencyServiceMock;
         private readonly Mock<IAesEncryptionStrategy> _encryptionMock;
         private readonly SecureCurrencyService _service;
+        private readonly Mock<IStringLocalizer<SharedResource>> _localizerMock;
 
         public SecureCurrencyServiceTests()
         {
             _currencyServiceMock = new Mock<ICurrencyService>();
             _encryptionMock = new Mock<IAesEncryptionStrategy>();
-            _service = new SecureCurrencyService(_currencyServiceMock.Object, _encryptionMock.Object);
+            _localizerMock = new Mock<IStringLocalizer<SharedResource>>();
+
+            _localizerMock.Setup(l => l[It.IsAny<string>()])
+                          .Returns((string key) => new LocalizedString(key, key));
+
+            _service = new SecureCurrencyService(_currencyServiceMock.Object, _encryptionMock.Object, _localizerMock.Object);
         }
 
         [Fact]
-        public async Task GetOneDecryptedAsync_CallsDecrypt_OnFields()
+        public async Task GetOneDecryptedAsync_DecryptsFields_WhenEncrypted()
         {
             // Arrange
             var id = Guid.NewGuid();
-            var encryptedCurrency = new Currency
+            var encryptedCurrency = new CurrencyDto
             {
                 Id = id,
-                Code = "encUSD",
-                ChineseName = "encTWD"
+                Code = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("USD")),
+                Name = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("美元"))
             };
 
-            _currencyServiceMock.Setup(s => s.GetCurrencyAsync(id))
+            _currencyServiceMock.Setup(s => s.GetOneCurrencyAsync(id))
                 .ReturnsAsync(encryptedCurrency);
-            _encryptionMock.Setup(e => e.Decrypt("encUSD")).Returns("USD");
-            _encryptionMock.Setup(e => e.Decrypt("encTWD")).Returns("美元");
+            _encryptionMock.Setup(e => e.Decrypt(It.IsAny<string>()))
+                .Returns<string>(s => System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(s)));
 
             // Act
             var result = await _service.GetOneDecryptedAsync(id);
@@ -47,9 +53,30 @@ namespace Tau_CoinDesk_Api.Tests
             Assert.Equal("USD", result.Code);
             Assert.Equal("美元", result.Name);
 
-            _currencyServiceMock.Verify(s => s.GetCurrencyAsync(id), Times.Once);
-            _encryptionMock.Verify(e => e.Decrypt("encUSD"), Times.Once);
-            _encryptionMock.Verify(e => e.Decrypt("encTWD"), Times.Once);
+            _encryptionMock.Verify(e => e.Decrypt(It.IsAny<string>()), Times.Exactly(2));
+        }
+        [Fact]
+        public async Task GetOneDecryptedAsync_ReturnsRawValues_WhenNotEncrypted()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var rawCurrency = new CurrencyDto
+            {
+                Id = id,
+                Code = "USD",
+                Name = "美元"
+            };
+
+            _currencyServiceMock.Setup(s => s.GetOneCurrencyAsync(id))
+                .ReturnsAsync(rawCurrency);
+
+            // Act
+            var ex = await Assert.ThrowsAsync<AppException>(() => _service.GetOneDecryptedAsync(id));
+
+            // Assert
+            Assert.Equal(400, ex.StatusCode);
+            Assert.Equal("InvalidOrUnencryptedCurrencyCode", ex.Message);
+            _encryptionMock.Verify(e => e.Decrypt(It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
