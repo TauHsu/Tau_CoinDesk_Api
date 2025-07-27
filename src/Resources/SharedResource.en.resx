@@ -36,6 +36,9 @@
   <data name="CurrencyNotFound" xml:space="preserve">
     <value>Currency not found</value>
   </data>
+  <data name="InvalidOrUnencryptedCurrencyCode" xml:space="preserve">
+    <value>Invalid or unencrypted currency code</value>
+  </data>
   <data name="VerifyFail" xml:space="preserve">
     <value>Verify Failed</value>
   </data>
