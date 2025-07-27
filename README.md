@@ -131,7 +131,7 @@ cp .env.example .env
 
 ---
 
-#### 一鍵啟動專案 (Docker 全部運行)
+#### 啟動專案 (Docker 全部運行)
 專案內已包含 **API 與 SQL Server** 的 `docker-compose.yml`，可一鍵啟動環境。
 ###### 步驟 1. 啟動服務 (API + SQL Server)
 ```bash
@@ -181,6 +181,7 @@ dotnet run --project src/Tau_CoinDesk_Api.csproj
 ```bash
 #建議測試時，先將 .env.example 複製為 .env
 # cp .env.example .env
+# 再將 .env 資訊填入 appsettings.json
 
 # Database
 DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
