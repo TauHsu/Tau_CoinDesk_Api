@@ -14,8 +14,7 @@ namespace Tau_CoinDesk_Api.Migrations
                 name: "Currencies",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(nullable: false),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ChineseName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
