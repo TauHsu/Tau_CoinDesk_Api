@@ -141,41 +141,42 @@ docker-compose up -d
 - db：SQL Server (帳號：sa / 密碼：Coindesk123)
 - api：ASP.NET Core 8.0 API (http://localhost:8080
 ###### 步驟 2. 初始化資料庫 (EF Core Migration)
-新增 Migration：
 ```bash
-dotnet ef migrations add InitialCreate --project src/Tau_CoinDesk_Api.csproj
+dotnet ef database update --project src/Tau_CoinDesk_Api.csproj
 ```
-執行 Migration：
-```bash
-docker exec -it coindesk-api dotnet ef database update
-```
-
 ###### 步驟 3. 測試 API
 - API 入口：http://localhost:8080
 - Swagger UI：http://localhost:8080/swagger
 
 ---
 
-## 本地開發 (API 本地執行，資料庫用 Docker)
-#### 啟動 SQL Server 容器
+#### 步驟 1. 本地開發 (API 本地執行，資料庫用 Docker)
+##### 啟動 SQL Server 容器
 ```bash
 docker-compose up -d db
 ```
-#### 編輯 .env，將資料庫連線改為：
+##### 步驟 2. 編輯 appsettings.json，將機密資料填入：
+(正式環境時，不會給予。)
 ```bash
 DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
+"AES": {
+   "Key": "0v25eKrg3qHDIuSLVFOnuh5n4085D133",
+   "IV": "CEHDTeYBPUnnYiPP"
+},
+"RSA": {
+   "PrivateKeyPath": "Keys/private.xml",
+   "PublicKeyPath": "Keys/public.xml"
+}
 ```
-#### 在本地端執行 Migration：
-新增 Migration(同上述 Docker 提到之方法)
-執行 Migration：
+##### 步驟 3. 初始化資料庫 (EF Core Migration)
 ```bash
-docker exec -it coindesk-api dotnet ef database update
+dotnet ef database update --project src/Tau_CoinDesk_Api.csproj
 ```
-#### 啟動 API（本地端）：
+##### 步驟 4. 啟動 API（本地端）：
 ```bash
 dotnet run --project src/Tau_CoinDesk_Api.csproj
 ```
-#### 測試 API：
+#### 步驟 5. API：
 - API 入口：http://localhost:5000
 - Swagger UI：http://localhost:5000/swagger
 ---
