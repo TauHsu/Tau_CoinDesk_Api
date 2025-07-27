@@ -124,7 +124,7 @@ git clone https://github.com/TauHsu/Tau_CoinDesk_Api.git
 cd Tau_CoinDesk_Api
 ```
 #### 環境變數設定
-複製 .env.example 為 .env，並依需求調整內容（尤其是 AES/RSA 設定與 DB 密碼）：
+複製 .env.example 為 .env，並依需求調整內容（AES/RSA 設定與 DB 密碼）：
 ```bash
 cp .env.example .env
 ```
@@ -180,12 +180,11 @@ dotnet run --project src/Tau_CoinDesk_Api.csproj
 
 ## 環境變數說明
 ```bash
-#建議測試時，先將 .env.example 複製為 .env
+# 測試時，先將 .env.example 複製為 .env
 # cp .env.example .env
-# 再將 .env 資訊填入 appsettings.json
 
 # Database
-DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
+DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=YourPassword;TrustServerCertificate=True;
 
 # AES Encryption
 # 注意：AES_KEY 長度需為 32 bytes，AES_IV 需為 16 bytes。
@@ -193,7 +192,7 @@ AES_KEY=your_AesKey_32bytes
 AES_IV=your_AesIv_16bytes
 
 # RSA Keys
-# 只需提供路徑，不需手動提供私鑰
+# 此為測試環境，所以撰寫了自動生成金鑰，方便測試。
 # 專案啟動時，如路徑下不存在檔案，會自動生成 2048-bit RSA 金鑰對至 Keys/ 資料夾
 RSA_PRIVATE_KEY_PATH=Keys/private.xml
 RSA_PUBLIC_KEY_PATH=Keys/public.xml
@@ -241,13 +240,13 @@ ORDER BY Code ASC;
 UPDATE Currencies
 SET ChineseName = N'美金'
 WHERE Code = N'USD';
-(或使用 Id 查詢修改 Id = N'070447F0-9DCC-4080-A21A-35B20005F5B4';)
+(或使用 Id 查詢修改 WHERE Id = N'......';)
 ```
 刪除 幣別
 ```bash
 DELETE FROM Currencies
 WHERE Code = N'USD';
-(或使用 Id 查詢刪除 WHERE Id = N'070447F0-9DCC-4080-A21A-35B20005F5B4';)
+(或使用 Id 查詢刪除 WHERE Id = N'......';)
 ```
 
 ---
