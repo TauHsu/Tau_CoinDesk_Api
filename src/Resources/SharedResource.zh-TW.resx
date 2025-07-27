@@ -36,6 +36,9 @@
   <data name="CurrencyNotFound" xml:space="preserve">
     <value>找不到該幣別</value>
   </data>
+  <data name="CurrencyDataNotChange" xml:space="preserve">
+    <value>幣別資料未改變</value>
+  </data>
   <data name="InvalidOrUnencryptedCurrencyCode" xml:space="preserve">
     <value>貨幣代碼無效或未加密</value>
   </data>
