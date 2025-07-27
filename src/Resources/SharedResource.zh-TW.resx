@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 中文 (繁體) 資源檔 -->
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- 新增翻譯 Key -->
+  <data name="GetSuccess" xml:space="preserve">
+    <value>取得成功</value>
+  </data>
+  <data name="CreateSuccess" xml:space="preserve">
+    <value>新增成功</value>
+  </data>
+  <data name="UpdateSuccess" xml:space="preserve">
+    <value>修改成功</value>
+  </data>
+  <data name="DeleteSuccess" xml:space="preserve">
+    <value>刪除成功</value>
+  </data>
+  <data name="VerifySuccess" xml:space="preserve">
+    <value>驗證成功</value>
+  </data>
+  <data name="CurrencyCodeExists" xml:space="preserve">
+    <value>該幣別已存在</value>
+  </data>
+  <data name="CurrencyNotFound" xml:space="preserve">
+    <value>找不到該幣別</value>
+  </data>
+  <data name="CurrencyDataNotChange" xml:space="preserve">
+    <value>幣別資料未改變</value>
+  </data>
+  <data name="InvalidOrUnencryptedCurrencyCode" xml:space="preserve">
+    <value>貨幣代碼無效或未加密</value>
+  </data>
+  <data name="VerifyFail" xml:space="preserve">
+    <value>驗證失敗</value>
+  </data>
+  
+  <data name="USD" xml:space="preserve">
+    <value>美元</value>
+  </data>
+  <data name="GBP" xml:space="preserve">
+    <value>英鎊</value>
+  </data>
+  <data name="EUR" xml:space="preserve">
+    <value>歐元</value>
+  </data>
+  <data name="CurrencyName.CHF" xml:space="preserve">
+    <value>瑞士法朗</value>
+  </data>
+  <data name="CAD" xml:space="preserve">
+    <value>加幣</value>
+  </data>
+  <data name="BRL" xml:space="preserve">
+    <value>雷阿爾</value>
+  </data>
+  <data name="TWD" xml:space="preserve">
+    <value>新台幣</value>
+  </data>
+  <data name="CNY" xml:space="preserve">
+    <value>人民幣</value>
+  </data>
+  <data name="HKD" xml:space="preserve">
+    <value>港幣</value>
+  </data>
+  <data name="JPY" xml:space="preserve">
+    <value>日圓</value>
+  </data>
+  <data name="KRW" xml:space="preserve">
+    <value>韓元</value>
+  </data>
+  <data name="SGD" xml:space="preserve">
+    <value>新加坡幣</value>
+  </data>
+  <data name="THB" xml:space="preserve">
+    <value>泰銖</value>
+  </data>
+  <data name="PHP" xml:space="preserve">
+    <value>菲律賓披索</value>
+  </data>
+  <data name="VND" xml:space="preserve">
+    <value>越南盾</value>
+  </data>
+  <data name="MYR" xml:space="preserve">
+    <value>令吉</value>
+  </data>
+  <data name="INR" xml:space="preserve">
+    <value>盧比</value>
+  </data>
+  <data name="AUD" xml:space="preserve">
+    <value>澳幣</value>
+  </data>
+  <data name="NZD" xml:space="preserve">
+    <value>紐西蘭幣</value>
+  </data>
+  <data name="RUB" xml:space="preserve">
+    <value>盧布</value>
+  </data>
+</root>
