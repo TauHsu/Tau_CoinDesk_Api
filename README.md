@@ -135,7 +135,7 @@ cp .env.example .env
 docker-compose up -d
 ```
 此指令會啟動：
-- db：SQL Server (帳號：sa / 密碼：YourPassword)
+- db：SQL Server (帳號：sa / 密碼：Coindesk123)
 - api：ASP.NET Core 8.0 API (http://localhost:8080
 ###### 步驟 2. 初始化資料庫 (EF Core Migration)
 ```bash
@@ -154,7 +154,7 @@ docker-compose up -d db
 ```
 #### 編輯 .env，將資料庫連線改為：
 ```bash
-DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=YourPassword;TrustServerCertificate=True;
+DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
 ```
 #### 在本地端執行 Migration：
 ```bash
@@ -175,7 +175,7 @@ dotnet run --project src/Tau_CoinDesk_Api.csproj
 # cp .env.example .env
 
 # Database
-DB_CONNECTION=Server=sql1,1433;Database=CoinDeskDb;User Id=sa;Password=YourPassword;TrustServerCertificate=True;
+DB_CONNECTION=Server=sql1,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
 
 # AES Encryption
 # 注意：AES_KEY 長度需為 32 bytes，AES_IV 需為 16 bytes。
