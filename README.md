@@ -10,7 +10,7 @@
 4. 所有功能包含單元測試。
 5. 支援 Docker 部署。
 6. [Demo 影片](https://youtu.be/elVZqB_dsi0?si=S4z5fS4BEnFLk7MV)
-   <iframe width="560" height="315" src="https://www.youtube.com/embed/elVZqB_dsi0?si=S4z5fS4BEnFLk7MV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+   {%youtube elVZqB_dsi0 %}
 
 ---
 
