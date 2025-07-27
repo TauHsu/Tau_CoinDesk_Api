@@ -1,8 +1,9 @@
-//using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Localization;
 using Tau_CoinDesk_Api.Models.Entities;
 using Tau_CoinDesk_Api.Models.Dto;
 using Tau_CoinDesk_Api.Interfaces.Services;
 using Tau_CoinDesk_Api.Interfaces.Encryption;
+using Tau_CoinDesk_Api.Exceptions;
 
 namespace Tau_CoinDesk_Api.Services
 {
@@ -10,11 +11,15 @@ namespace Tau_CoinDesk_Api.Services
     {
         private readonly ICurrencyService _currencyService;
         private readonly IAesEncryptionStrategy _aesEncryption;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public SecureCurrencyService(ICurrencyService currencyService, IAesEncryptionStrategy aesEncryption)
+        public SecureCurrencyService(ICurrencyService currencyService,
+                                     IAesEncryptionStrategy aesEncryption,
+                                     IStringLocalizer<SharedResource> localizer)
         {
             _currencyService = currencyService;
             _aesEncryption = aesEncryption;
+            _localizer = localizer;
         }
 
         /*
@@ -34,12 +39,16 @@ namespace Tau_CoinDesk_Api.Services
         // 查詢單一（解密後回傳）
         public async Task<CurrencyDto> GetOneDecryptedAsync(Guid id)
         {
-            var currency = await _currencyService.GetCurrencyAsync(id);
+            var currency = await _currencyService.GetOneCurrencyAsync(id);
+            if (!IsBase64String(currency!.Code))
+            {
+                throw new AppException(400, _localizer["InvalidOrUnencryptedCurrencyCode"]);
+            }
             return new CurrencyDto
             {
                 Id = currency!.Id,
                 Code = _aesEncryption.Decrypt(currency.Code),
-                Name = _aesEncryption.Decrypt(currency.ChineseName)
+                Name = _aesEncryption.Decrypt(currency.Name)
             };
         }
 
@@ -65,5 +74,14 @@ namespace Tau_CoinDesk_Api.Services
             return await _currencyService.DeleteCurrencyAsync(id);
         }
         */
+
+        private bool IsBase64String(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+
+            Span<byte> buffer = new Span<byte>(new byte[value.Length]);
+            return Convert.TryFromBase64String(value, buffer, out _);
+        }
     }
 }
