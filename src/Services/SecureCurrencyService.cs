@@ -48,7 +48,7 @@ namespace Tau_CoinDesk_Api.Services
             {
                 Id = currency!.Id,
                 Code = _aesEncryption.Decrypt(currency.Code),
-                Name = _aesEncryption.Decrypt(currency.Name)
+                Name = _localizer[$"{_aesEncryption.Decrypt(currency.Name)}"]
             };
         }
 
