@@ -3,13 +3,13 @@
 此專案使用 ASP.NET Core 8.0 Web API，整合 Coindesk API，並實作：
 1. 幣別資料庫維護功能 (查詢、新增、修改、刪除）。
    - 取得幣別列表、取得單一幣別，新增、修改、刪除幣別，共 5 支 API。
+   - 最下方附上 建立 SQL 語法。
 2. 呼叫 Coindesk API，轉換並輸出新的 API。
    - 提供匯率與更新時間，整合幣別中文名稱。
 3. 使用 Entity Framework Core，資料庫以 Docker 部署之 SQL Server (非 LocalDB)。
-   - 因本人開發環境為 Mac。
 4. 所有功能包含單元測試。
 5. 支援 Docker 部署。
-## [Demo 影片](https://youtu.be/elVZqB_dsi0?si=S4z5fS4BEnFLk7MV)
+## [Demo Video](https://youtu.be/elVZqB_dsi0?si=S4z5fS4BEnFLk7MV)
 [![Demo Video](http://img.youtube.com/vi/elVZqB_dsi0/default.jpg)](https://www.youtube.com/watch?v=elVZqB_dsi0)
 
 ---
@@ -128,6 +128,9 @@ cd Tau_CoinDesk_Api
 ```bash
 cp .env.example .env
 ```
+
+---
+
 #### 一鍵啟動專案 (Docker 全部運行)
 專案內已包含 **API 與 SQL Server** 的 `docker-compose.yml`，可一鍵啟動環境。
 ###### 步驟 1. 啟動服務 (API + SQL Server)
@@ -138,9 +141,15 @@ docker-compose up -d
 - db：SQL Server (帳號：sa / 密碼：Coindesk123)
 - api：ASP.NET Core 8.0 API (http://localhost:8080
 ###### 步驟 2. 初始化資料庫 (EF Core Migration)
+新增 Migration：
 ```bash
 docker exec -it coindesk-api dotnet ef database update
 ```
+執行 Migration：
+```bash
+dotnet ef database update --project src/Tau_CoinDesk_Api.csproj
+```
+
 ###### 步驟 3. 測試 API
 - API 入口：http://localhost:8080
 - Swagger UI：http://localhost:8080/swagger
@@ -157,9 +166,8 @@ docker-compose up -d db
 DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
 ```
 #### 在本地端執行 Migration：
-```bash
-dotnet ef database update
-```
+新增、執行 Migration(同上述 Docker 提到之方法)
+
 #### 啟動 API（本地端）：
 ```bash
 dotnet run --project src/Tau_CoinDesk_Api.csproj
@@ -175,7 +183,7 @@ dotnet run --project src/Tau_CoinDesk_Api.csproj
 # cp .env.example .env
 
 # Database
-DB_CONNECTION=Server=sql1,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
+DB_CONNECTION=Server=localhost,1433;Database=CoinDeskDb;User Id=sa;Password=Coindesk123;TrustServerCertificate=True;
 
 # AES Encryption
 # 注意：AES_KEY 長度需為 32 bytes，AES_IV 需為 16 bytes。
@@ -199,6 +207,53 @@ RSA_PUBLIC_KEY_PATH=Keys/public.xml
 ```bash
 dotnet test
 ```
+
+---
+
+## SQL 語法
+建立 Currencies 資料表
+```sql
+CREATE TABLE Currencies (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+    Code NVARCHAR(50) NOT NULL,
+    ChineseName NVARCHAR(50) NOT NULL
+);
+```
+建立唯一索引，避免重複幣別代碼
+```sql
+CREATE UNIQUE INDEX IX_Currencies_Code ON Currencies(Code);
+```
+新增 幣別
+```sql
+INSERT INTO Currencies (Id, Code, ChineseName)
+VALUES (NEWID(),N'GBP', N'英鎊');
+```
+查詢 幣別
+```sql
+SELECT Id, Code, ChineseName
+FROM Currencies
+ORDER BY Code ASC;
+```
+修改 幣別
+```sql
+UPDATE Currencies
+SET ChineseName = N'美金'
+WHERE Code = N'USD';
+(或使用 Id 查詢修改 Id = N'070447F0-9DCC-4080-A21A-35B20005F5B4';)
+```
+刪除 幣別
+```bash
+DELETE FROM Currencies
+WHERE Code = N'USD';
+(或使用 Id 查詢刪除 WHERE Id = N'070447F0-9DCC-4080-A21A-35B20005F5B4';)
+```
+
+---
+
+## 加密技術應用簡介
+本專案使用以下加密技術保障資料安全：
+- AES 加解密：對敏感資料（如幣別代碼）進行對稱式加密，確保資料在儲存和傳輸過程中不被竊取。
+- RSA 簽章與驗證：使用非對稱式加密技術，對匯率資料進行數位簽章，確保資料的完整性與真實性，並用公鑰進行驗證防止偽造。
 
 ---
 
