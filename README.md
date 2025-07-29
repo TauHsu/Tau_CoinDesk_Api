@@ -1,4 +1,4 @@
-# 徐韜 ASP.NET Core 8.0 Coindesk API 專案
+# ASP.NET Core 8.0 Coindesk API
 ## 專案簡介
 此專案使用 ASP.NET Core 8.0 Web API，整合 Coindesk API，並實作：
 1. 幣別資料庫維護功能 (查詢、新增、修改、刪除）。
